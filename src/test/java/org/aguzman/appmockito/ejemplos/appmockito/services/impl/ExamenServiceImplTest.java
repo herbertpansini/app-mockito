@@ -2,8 +2,11 @@ package org.aguzman.appmockito.ejemplos.appmockito.services.impl;
 
 import org.aguzman.appmockito.ejemplos.appmockito.Datos;
 import org.aguzman.appmockito.ejemplos.appmockito.models.Examen;
+import org.aguzman.appmockito.ejemplos.appmockito.repositories.ExamenRepository;
+import org.aguzman.appmockito.ejemplos.appmockito.repositories.PreguntaRepository;
 import org.aguzman.appmockito.ejemplos.appmockito.repositories.impl.ExamenRepositoryImpl;
 import org.aguzman.appmockito.ejemplos.appmockito.repositories.impl.PreguntaRepositoryImpl;
+import org.aguzman.appmockito.ejemplos.appmockito.services.ExamenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +19,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -266,5 +270,25 @@ class ExamenServiceImplTest {
         Examen examen = examenService.findExamenPorNombreConPreguntas("Matemáticas");
         assertEquals(5L, examen.getId());
         assertEquals("Matemáticas", examen.getNombre());
+    }
+
+    @Test
+    void testSpy() {
+        ExamenRepository examenRepository = spy(ExamenRepositoryImpl.class);
+        PreguntaRepository preguntaRepository = spy(PreguntaRepositoryImpl.class);
+        ExamenService examenService = new ExamenServiceImpl(examenRepository, preguntaRepository);
+
+        List<String> preguntas = Arrays.asList("aritmética");
+//        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(preguntas);
+        doReturn(preguntas).when(preguntaRepository).findPreguntasPorExamenId(anyLong());
+
+        Examen examen = examenService.findExamenPorNombreConPreguntas("Matemáticas");
+        assertEquals(5L, examen.getId());
+        assertEquals("Matemáticas", examen.getNombre());
+        assertEquals(1, examen.getPreguntas().size());
+        assertTrue(examen.getPreguntas().contains("aritmética"));
+
+        verify(examenRepository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(anyLong());
     }
 }
