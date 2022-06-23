@@ -2,8 +2,8 @@ package org.aguzman.appmockito.ejemplos.appmockito.services.impl;
 
 import org.aguzman.appmockito.ejemplos.appmockito.Datos;
 import org.aguzman.appmockito.ejemplos.appmockito.models.Examen;
-import org.aguzman.appmockito.ejemplos.appmockito.repositories.ExamenRepository;
-import org.aguzman.appmockito.ejemplos.appmockito.repositories.PreguntaRepository;
+import org.aguzman.appmockito.ejemplos.appmockito.repositories.impl.ExamenRepositoryImpl;
+import org.aguzman.appmockito.ejemplos.appmockito.repositories.impl.PreguntaRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class ExamenServiceImplTest {
     @Mock
-    ExamenRepository examenRepository;
+    ExamenRepositoryImpl examenRepository;
 
     @Mock
-    PreguntaRepository preguntaRepository;
+    PreguntaRepositoryImpl preguntaRepository;
 
     @InjectMocks
     ExamenServiceImpl examenService;
@@ -254,5 +254,17 @@ class ExamenServiceImplTest {
 
         verify(examenRepository).guardar(any(Examen.class));
         verify(preguntaRepository).guardarVarias(anyList());
+    }
+
+    @Test
+    void testDoCallRealMethod() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+//        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+
+        doCallRealMethod().when(preguntaRepository).findPreguntasPorExamenId(anyLong());
+
+        Examen examen = examenService.findExamenPorNombreConPreguntas("Matemáticas");
+        assertEquals(5L, examen.getId());
+        assertEquals("Matemáticas", examen.getNombre());
     }
 }
