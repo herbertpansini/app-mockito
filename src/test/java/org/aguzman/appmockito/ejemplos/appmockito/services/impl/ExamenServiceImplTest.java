@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -208,5 +207,52 @@ class ExamenServiceImplTest {
         doThrow(IllegalArgumentException.class).when(preguntaRepository).guardarVarias(anyList());
 
         assertThrows(IllegalArgumentException.class, () -> examenService.guardar(examen) );
+    }
+
+    @Test
+    void testDoAnswer() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+//        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+
+        doAnswer(invocationOnMock -> {
+           Long id = invocationOnMock.getArgument(0);
+           return id == 5L ? Datos.PREGUNTAS : Collections.emptyList();
+        }).when(preguntaRepository).findPreguntasPorExamenId(anyLong());
+
+        Examen examen = examenService.findExamenPorNombreConPreguntas("Matemáticas");
+        assertEquals(5L, examen.getId());
+        assertEquals("Matemáticas", examen.getNombre());
+        assertEquals(5, examen.getPreguntas().size());
+        assertTrue(examen.getPreguntas().contains("geometría"));
+
+        verify(preguntaRepository).findPreguntasPorExamenId(anyLong());
+    }
+
+    @Test
+    void testDoAnswerGuardarExamen() {
+        // Given
+        Examen newExamen = Datos.EXAMEN;
+        newExamen.setPreguntas(Datos.PREGUNTAS);
+
+        doAnswer(new Answer<Examen>() {
+                     Long secuencia = 8L;
+                     @Override
+                     public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
+                         Examen examen = invocationOnMock.getArgument(0);
+                         examen.setId(secuencia++);
+                         return examen;
+                     }
+                 }).when(examenRepository).guardar(any(Examen.class));
+
+        // When
+        Examen examen = examenService.guardar(newExamen);
+
+        // Then
+        assertNotNull(examen.getId());
+        assertEquals(8L, examen.getId());
+        assertEquals("Física", examen.getNombre());
+
+        verify(examenRepository).guardar(any(Examen.class));
+        verify(preguntaRepository).guardarVarias(anyList());
     }
 }
