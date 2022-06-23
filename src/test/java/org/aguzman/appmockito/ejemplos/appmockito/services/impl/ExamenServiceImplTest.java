@@ -86,4 +86,19 @@ class ExamenServiceImplTest {
         verify(examenRepository).findAll();
         verify(preguntaRepository).findPreguntasPorExamenId(anyLong());
     }
+
+    @Test
+    void testGuardarExamen() {
+        Examen newExamen = Datos.EXAMEN;
+        newExamen.setPreguntas(Datos.PREGUNTAS);
+
+        when(examenRepository.guardar(any(Examen.class))).thenReturn(newExamen);
+        Examen examen = examenService.guardar(newExamen);
+        assertNotNull(examen.getId());
+        assertEquals(8L, examen.getId());
+        assertEquals("Física", examen.getNombre());
+
+        verify(examenRepository).guardar(any(Examen.class));
+        verify(preguntaRepository).guardarVarias(anyList());
+    }
 }
