@@ -316,4 +316,17 @@ class ExamenServiceImplTest {
         inOrder.verify(examenRepository).findAll();
         inOrder.verify(preguntaRepository).findPreguntasPorExamenId(6L);
     }
+
+    @Test
+    void testNumeroDeInvocaciones() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+        examenService.findExamenPorNombreConPreguntas("Matemáticas");
+
+        verify(preguntaRepository).findPreguntasPorExamenId(5L);
+        verify(preguntaRepository, times(1)).findPreguntasPorExamenId(5L);
+        verify(preguntaRepository, atLeast(1)).findPreguntasPorExamenId(5L);
+        verify(preguntaRepository, atLeastOnce()).findPreguntasPorExamenId(5L);
+        verify(preguntaRepository, atMost(1)).findPreguntasPorExamenId(5L);
+        verify(preguntaRepository, atMostOnce()).findPreguntasPorExamenId(5L);
+    }
 }
