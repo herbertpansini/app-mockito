@@ -7,6 +7,10 @@ import org.aguzman.appmockito.ejemplos.appmockito.repositories.PreguntaRepositor
 import org.aguzman.appmockito.ejemplos.appmockito.services.ExamenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,16 +20,22 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class ExamenServiceImplTest {
+    @Mock
     ExamenRepository examenRepository;
+
+    @Mock
     PreguntaRepository preguntaRepository;
-    ExamenService examenService;
+
+    @InjectMocks
+    ExamenServiceImpl examenService;
 
     @BeforeEach
     void setUp() {
-        examenRepository = mock(ExamenRepository.class);
-        preguntaRepository = mock(PreguntaRepository.class);
-        examenService = new ExamenServiceImpl(examenRepository, preguntaRepository);
+//        examenRepository = mock(ExamenRepository.class);
+//        preguntaRepository = mock(PreguntaRepository.class);
+//        examenService = new ExamenServiceImpl(examenRepository, preguntaRepository);
     }
 
     @Test
