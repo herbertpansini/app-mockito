@@ -7,6 +7,7 @@ import org.aguzman.appmockito.ejemplos.appmockito.repositories.PreguntaRepositor
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -142,5 +143,43 @@ class ExamenServiceImplTest {
 
         verify(examenRepository).findAll();
         verify(preguntaRepository).findPreguntasPorExamenId(argThat(arg -> arg != null && arg >= 5L));
+    }
+
+    @Test
+    void testArgumentMatchers2() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES_ID_NEGATIVOS);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+        examenService.findExamenPorNombreConPreguntas("Matemáticas");
+
+        verify(examenRepository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(argThat(new MiArgumentMatchers()));
+    }
+
+    @Test
+    void testArgumentMatchers3() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES_ID_NEGATIVOS);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+        examenService.findExamenPorNombreConPreguntas("Matemáticas");
+
+        verify(examenRepository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(argThat((aLong) -> aLong != null && aLong > 0));
+    }
+
+    public static class MiArgumentMatchers implements ArgumentMatcher<Long> {
+
+        private Long aLong;
+
+        @Override
+        public boolean matches(Long aLong) {
+            this.aLong = aLong;
+            return aLong != null && aLong > 0;
+        }
+
+        @Override
+        public String toString() {
+            return "Es para un mensaje personalizado de error " +
+                    "que imprime mockito en caso de que falle el test " +
+                    + this.aLong + " debe ser un entero positivo.";
+        }
     }
 }
